@@ -19,29 +19,30 @@
 (defn- hand->rank [hand]
   (map rank hand))
 
-(defn- vals-by-rank [hand]
+(defn- rank-freqs [hand]
   (vals (frequencies (map rank hand))))
 
-(defn- max-same-rank [hand]
-  (apply max (vals-by-rank hand)))
+(defn- n-of-a-kind? [hand kind]
+  (= kind (apply max (rank-freqs hand))))
 
 (defn pair? [hand]
-  (= 2 (max-same-rank hand)))
+  (n-of-a-kind? hand 2))
 
 (defn three-of-a-kind? [hand]
-  (= 3 (max-same-rank hand)))
+  (n-of-a-kind? hand 3))
 
 (defn four-of-a-kind? [hand]
-  (= 4 (max-same-rank hand)))
+  (n-of-a-kind? hand 4))
 
 (defn flush? [hand]
   (apply = (map suit hand)))
 
 (defn full-house? [hand]
-  (= [2 3] (sort (vals-by-rank hand))))
+  (let [freqs (sort (rank-freqs hand))]
+    (= [2 3] freqs)))
 
 (defn two-pairs? [hand]
-  (or (= [1 2 2] (sort (vals-by-rank hand)))
+  (or (= [1 2 2] (sort (rank-freqs hand)))
       (four-of-a-kind? hand)))
 
 (defn- straight-seq? [hand]
@@ -66,6 +67,7 @@
                    [straight? 4]    [flush? 5]
                    [full-house? 6]  [four-of-a-kind? 7]
                    [straight-flush? 8]}
-        matches (filter #((first %) hand) checkers)
+        matches? (fn [[matcher _]] (matcher hand))
+        matches (filter matches? checkers)
         scores  (map second matches)]
     (apply max scores)))
