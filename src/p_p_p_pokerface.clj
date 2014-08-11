@@ -23,7 +23,8 @@
   (vals (frequencies (map rank hand))))
 
 (defn- n-of-a-kind? [hand kind]
-  (= kind (apply max (rank-freqs hand))))
+  (let [kinds (set (rank-freqs hand))]
+    (contains? kinds kind)))
 
 (defn pair? [hand]
   (n-of-a-kind? hand 2))
@@ -38,8 +39,7 @@
   (apply = (map suit hand)))
 
 (defn full-house? [hand]
-  (let [freqs (sort (rank-freqs hand))]
-    (= [2 3] freqs)))
+  (and (pair? hand) (three-of-a-kind? hand)))
 
 (defn two-pairs? [hand]
   (or (= [1 2 2] (sort (rank-freqs hand)))
